@@ -20,6 +20,7 @@ Background data comes from the NASA material the team collected (mission design
 webinar, GMAT/mission-viz style orbit concepts, Webb "Build It Yourself" game).
 """
 import math
+import os
 import random
 import sys
 
@@ -30,6 +31,14 @@ G0 = 9.80665          # standard gravity (m/s^2)
 DATA_CAP = 120        # onboard memory (Gb)
 FONT_UI = "dejavusans,arial,helvetica,liberationsans"
 FONT_MONO = "dejavusansmono,consolas,couriernew,liberationmono"
+ASSET_FILES = {
+    'simple': 'astronauta-simples.png',
+    'very_angry': 'astronauta-muitobravo.png',
+    'very_happy': 'astronauta-mt-feliz.png',
+    'space': 'astronauta-espaco.png',
+    'angry': 'astronauta-bravo.png',
+    'waving': 'astronauta-acenando.png',
+}
 
 # NASA references used to shape the mission-design flow, orbit model and game
 # interaction. The game remains self-contained and does not download them.
@@ -152,6 +161,7 @@ def stage_calc(kind, ship, dv):
 S = {}       # mission state (design values + simulation values)
 G = {}       # UI state (scene, deck of cards, toast, flight ...)
 F = {}       # fonts
+A = {}       # astronaut emotion sprites and menu artwork
 screen = None
 
 
@@ -163,7 +173,8 @@ def new_game():
              wet=0.0, cap_l=1.0, lcost=0.0, ltime=0.0, creative=0, log=[], mode='build', launched=False,
              energy=0.0, fuel=0.0, fuel0=1.0, data=0.0, dgen=0.0, dret=0.0, used=set(), fail=None,
              deadline_on=True, overflow=False)
-    G.update(deck=start_deck(), cur=None, lean=0, off=0.0, fly=None, toast=('', C_TEXT, 0.0), phase='', fl=None, res=None)
+    G.update(deck=start_deck(), cur=None, lean=0, off=0.0, fly=None, toast=('', C_TEXT, 0.0),
+             phase='', fl=None, res=None, emotion='simple')
 
 
 def card(who, title, text, art, left, right, tip=''):
@@ -610,6 +621,14 @@ def resolve(c):
             S['log'].append(r['log'])
     if c.get('log') and not went_bad:
         S['log'].append(c['log'])
+    if went_bad:
+        G['emotion'] = 'very_angry'
+    elif c.get('creative'):
+        G['emotion'] = 'very_happy'
+    elif msg:
+        G['emotion'] = 'waving'
+    else:
+        G['emotion'] = 'simple'
     G['toast'] = (msg, col, 4.0)
     if S['mode'] == 'sim':
         tick()
@@ -807,6 +826,15 @@ def text(surf, s, font, color, x, y, maxw=None, align='left', lh=None):
     return y
 
 
+def draw_astronaut(surf, rect, emotion='simple', alpha=255):
+    """Draw one of the supplied astronaut sprites at a UI location."""
+    image = A.get(emotion) or A['simple']
+    scaled = pygame.transform.smoothscale(image, (rect[2], rect[3]))
+    if alpha != 255:
+        scaled.set_alpha(alpha)
+    surf.blit(scaled, (rect[0], rect[1]))
+
+
 def draw_art(surf, rect, kind, t):
     x0, y0, w, h = rect
     cx, cy = x0 + w // 2, y0 + h // 2
@@ -995,16 +1023,24 @@ def draw_stars(t):
         screen.set_at((sx, sy), (110 + i % 100, 115 + i % 90, 160 + i % 90))
 
 
+def menu_play_rect():
+    return pygame.Rect(round(452 / 1299 * W), round(318 / 770 * H),
+                       round(423 / 1299 * W), round(108 / 770 * H))
+
+
 def draw_title(t):
-    screen.fill(C_BG)
-    draw_stars(t)
-    text(screen, 'for_astronaut', F['big'], C_TEXT, W // 2, 120, align='center')
-    text(screen, 'Space Mission Design Game', F['h2'], C_ACC, W // 2, 190, align='center')
-    draw_art(screen, (W // 2 - 90, 250, 180, 200), 'rocket_m', t)
-    text(screen, 'Plan, build and fly a complete space mission. Every card is a trade-off.', F['n'], C_DIM, W // 2, 490, align='center')
-    text(screen, 'Mouse left/right (or arrow keys) to preview, click (or press again) to choose.', F['n'], C_DIM, W // 2, 515, align='center')
+    screen.fill((0, 0, 0))
+    menu = pygame.transform.smoothscale(A['menu'], (W, H))
+    screen.blit(menu, (0, 0))
+    play = menu_play_rect()
+    if play.collidepoint(pygame.mouse.get_pos()):
+        overlay = pygame.Surface(play.size, pygame.SRCALPHA)
+        overlay.fill((255, 255, 255, 28))
+        screen.blit(overlay, play.topleft)
+        pygame.draw.rect(screen, C_WARN, play, 3)
+    draw_astronaut(screen, (W - 142, H - 148, 112, 112), 'waving')
     if int(t * 2) % 2 == 0:
-        text(screen, 'Press SPACE to start', F['b'], C_WARN, W // 2, 600, align='center')
+        text(screen, 'Click PLAY or press SPACE to start', F['b'], C_WARN, W // 2, H - 42, align='center')
 
 
 def draw_banner(t):
@@ -1016,6 +1052,7 @@ def draw_banner(t):
     text(screen, G['phase'], F['s'], C_DIM, W // 2, 76, align='center')
     pygame.draw.rect(screen, C_PANEL, (80, 110, W - 160, 560), border_radius=16)
     pygame.draw.rect(screen, C_LINE, (80, 110, W - 160, 560), 2, border_radius=16)
+    draw_astronaut(screen, (850, 132, 100, 100), G['emotion'])
     text(screen, it['title'], F['h1'], C_TEXT, W // 2, 130, align='center')
     y = 200
     for ln in it['lines']:
@@ -1040,6 +1077,7 @@ def draw_card_scene(t):
         apply_fx(c['fx']() if callable(c['fx']) else c['fx'], pv)
     draw_hud(pv)
     text(screen, G['phase'] + f"     Science: {S['sci']:.0f} pts", F['s'], C_DIM, W // 2, 76, align='center')
+    draw_astronaut(screen, (454, 86, 92, 92), G['emotion'])
     draw_side((12, 134, 270, 480), it['L'], lean < 0)
     draw_side((718, 134, 270, 480), it['R'], lean > 0)
     G['off'] += (lean * 24 - G['off']) * 0.2
@@ -1060,6 +1098,7 @@ def draw_card_scene(t):
 
 def draw_flight(t):
     fl = G['fl']
+    G['emotion'] = 'space' if fl['mode'] == 'transfer' else 'very_happy'
     frac = min(1.0, fl['dv'] / fl['dv_req']) if fl['dv_req'] else 1.0
     if fl['mode'] == 'ascent':
         k = max(0.0, 1 - frac * 1.4)
@@ -1152,6 +1191,7 @@ def draw_end(t):
         head, col = 'MISSION COMPLETE', C_GOOD
     text(screen, 'PHASE 5/5: RESULTS', F['s'], C_DIM, W // 2, 14, align='center')
     text(screen, head, F['h1'], col, 40, 34)
+    draw_astronaut(screen, (690, 42, 96, 96), 'very_happy' if not S['fail'] else 'angry')
     if S['fail']:
         text(screen, S['fail'], F['n'], C_WARN, 40, 80, maxw=700)
     info = f"{S['diff']}  |  " + (OBJ_NAME[S['obj']] if S['obj'] else '') + (f"  |  {ORB[S['orbit']]['name']}" if S['orbit'] else '') + (f"  |  {LAUNCH[S['launcher']]['name']}" if S['launcher'] else '')
@@ -1190,6 +1230,10 @@ def init():
     F.update(big=pygame.font.SysFont(FONT_UI, 72, bold=True), h1=pygame.font.SysFont(FONT_UI, 40, bold=True),
              h2=pygame.font.SysFont(FONT_UI, 22, bold=True), b=pygame.font.SysFont(FONT_UI, 18, bold=True),
              n=pygame.font.SysFont(FONT_UI, 15), s=pygame.font.SysFont(FONT_UI, 13), m=pygame.font.SysFont(FONT_MONO, 14))
+    asset_dir = os.path.dirname(os.path.abspath(__file__))
+    A['menu'] = pygame.image.load(os.path.join(asset_dir, 'menu-completo.png')).convert_alpha()
+    for emotion, filename in ASSET_FILES.items():
+        A[emotion] = pygame.image.load(os.path.join(asset_dir, filename)).convert_alpha()
     new_game()
     G['scene'] = 'title'
 
@@ -1209,7 +1253,7 @@ def update(dt, events):
         if e.type == pygame.QUIT or (e.type == pygame.KEYDOWN and e.key == pygame.K_ESCAPE):
             return False
         go = e.type == pygame.KEYDOWN and e.key in (pygame.K_SPACE, pygame.K_RETURN)
-        if sc == 'title' and (go or e.type == pygame.MOUSEBUTTONDOWN):
+        if sc == 'title' and (go or (e.type == pygame.MOUSEBUTTONDOWN and menu_play_rect().collidepoint(e.pos))):
             new_game()
             advance()
         elif sc == 'banner' and (go or e.type == pygame.MOUSEBUTTONDOWN):
