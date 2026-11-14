@@ -31,6 +31,16 @@ DATA_CAP = 120        # onboard memory (Gb)
 FONT_UI = "dejavusans,arial,helvetica,liberationsans"
 FONT_MONO = "dejavusansmono,consolas,couriernew,liberationmono"
 
+# NASA references used to shape the mission-design flow, orbit model and game
+# interaction. The game remains self-contained and does not download them.
+NASA_SOURCES = (
+    "https://www.nasa.gov/wp-content/uploads/2025/04/250323-design-and-develop-science-mission.pdf",
+    "https://software.nasa.gov/software/GSC-19468-1",
+    "https://etd.gsfc.nasa.gov/capabilities/integrated-design-center/mission-design-lab/",
+    "https://nasa.github.io/mission-viz/",
+    "https://science.nasa.gov/mission/webb/game-build-it-yourself/",
+)
+
 C_BG = (7, 9, 20)
 C_PANEL = (20, 26, 52)
 C_LINE = (60, 74, 120)
@@ -64,6 +74,33 @@ for _k, _name, _body, _alt, _dv, _dvup, _ecl, _eclh, _link in [
     _r = _rad + _alt
     ORB[_k] = dict(name=_name, body=_body, alt=_alt, dv=_dv, dv_up=_dvup, ecl=_ecl, ecl_h=_eclh, link=_link,
                    v=math.sqrt(_mu / _r), T=2 * math.pi * math.sqrt(_r ** 3 / _mu))
+
+
+def lagrange_l1_distance(primary_mass, secondary_mass, separation_km):
+    """Estimate the collinear L1 point with the circular restricted three-body model.
+
+    The dimensionless rotating-frame equation is dOmega/dx = 0, where
+    Omega = (x^2 + y^2) / 2 + (1-mu) / r1 + mu / r2.
+    Newton's method solves the x-axis equation between the two bodies.
+    """
+    mu = secondary_mass / (primary_mass + secondary_mass)
+    x = 1 - mu - (mu / 3) ** (1 / 3)
+
+    def derivative(value):
+        primary_term = (1 - mu) * (value + mu) / abs(value + mu) ** 3
+        secondary_term = mu * (value - (1 - mu)) / abs(value - (1 - mu)) ** 3
+        return value - primary_term - secondary_term
+
+    for _ in range(20):
+        h = 1e-6
+        slope = (derivative(x + h) - derivative(x - h)) / (2 * h)
+        x -= derivative(x) / slope
+    return ((1 - mu) - x) * separation_km
+
+
+# Approximate Earth/Moon masses and mean separation, used for an educational
+# L1 readout in the lunar-orbit briefing.
+EARTH_MOON_L1_KM = lagrange_l1_distance(5.972e24, 7.342e22, 384400.0)
 
 # how useful each orbit is for each objective (science multiplier)
 FIT = {'earth': {'leo': 0.85, 'polar': 1.0, 'geo': 0.7, 'lunar': 0.15},
@@ -265,6 +302,7 @@ def orbit_banner_lines():
         lines.append('|' + f"{v['name']:<16} {v['cost']:>3} M$   {CAP[k][0]:>7,.0f} kg / {CAP[k][1]:>7,.0f} kg")
     fit = FIT[S['obj']]
     lines += ['', f"Objective: {OBJ_NAME[S['obj']]}.  Orbit fit: LEO {fit['leo']:.2f}, Polar {fit['polar']:.2f}, GEO {fit['geo']:.2f}, Lunar {fit['lunar']:.2f}",
+              f"Earth-Moon L1 estimate: {EARTH_MOON_L1_KM:,.0f} km from the Moon (rotating-frame Lagrange model).",
               'Going to GEO or the Moon needs an upper stage with extra delta-v. Heavier ships need bigger rockets.']
     return lines
 
@@ -274,7 +312,7 @@ def orbit_cards():
         return [card('Mission Analyst', 'High orbits: Earth or Moon?', 'Both need about 4 km/s of extra delta-v after reaching LEO, and both have slower communication links.', 'planet',
                      ch('Geostationary', set=dict(orbit='geo'), note='Hovers over one spot. 24 h period. Rare eclipses.', art='orbit_geo'),
                      ch('Lunar orbit', set=dict(orbit='lunar'), note='Around the Moon. 2 h period. Long eclipses.', art='orbit_lunar'),
-                     tip='Geostationary: the orbital period equals one sidereal day (23 h 56 min), so the craft hovers.')]
+                     tip=f'Geostationary: the orbital period equals one sidereal day (23 h 56 min), so the craft hovers. The Earth-Moon L1 point is about {EARTH_MOON_L1_KM:,.0f} km from the Moon.')]
 
     def o2():
         return [card('Mission Analyst', 'Polar or higher?', 'A polar orbit passes over both poles while the planet turns underneath, so it eventually sees everywhere.', 'planet',
