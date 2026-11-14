@@ -40,9 +40,11 @@ python -m pip install pygame
 python for_astronaut.py
 ```
 
-Use the mouse or arrow keys to preview and select choices. Press `Space` to
-continue through briefings and completed flight animations, `R` to restart on
-the results screen, and `Esc` to quit.
+Click the `PLAY` button on the supplied menu artwork (or press `Space`) to
+start. Use the mouse or arrow keys to preview and select choices. The
+astronaut sprites react to mission decisions, risks, flight stages and results.
+Press `Space` to continue through briefings and completed flight animations,
+`R` to restart on the results screen, and `Esc` to quit.
 
 ## NASA references
 
