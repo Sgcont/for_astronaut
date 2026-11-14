@@ -172,9 +172,11 @@ def new_game():
              prop=40.0, comp=None, att=None, pcomm=0.0, orbit=None, launcher=None, stage=None, st=None,
              wet=0.0, cap_l=1.0, lcost=0.0, ltime=0.0, creative=0, log=[], mode='build', launched=False,
              energy=0.0, fuel=0.0, fuel0=1.0, data=0.0, dgen=0.0, dret=0.0, used=set(), fail=None,
-             deadline_on=True, overflow=False)
+             deadline_on=True, overflow=False,
+             hidden_score=0,  hidden_notes=[])
     G.update(deck=start_deck(), cur=None, lean=0, off=0.0, fly=None, toast=('', C_TEXT, 0.0),
              phase='', fl=None, res=None, emotion='simple')
+    
 
 
 def card(who, title, text, art, left, right, tip=''):
@@ -424,7 +426,7 @@ def sim_deck():
         f"Orbit reached: {ORB[S['orbit']]['name']}. Instruments are on.",
         'Collect data, then send it to Earth. Science only counts if the data comes home.',
         f"Onboard memory holds {DATA_CAP} Gb. Link: {S['comm']:.0f} Mbps (x{ORB[S['orbit']]['link']} for this distance)."]))
-    items += [ev('campaign'), pick(['eclipse', 'flare', 'bufferfull', 'drag']), ev('downlink'), ev('campaign2'), ev('downlink2'), ev('extend')]
+    items += [ev('campaign'), pick(['eclipse', 'flare', 'bufferfull', 'drag', 'critical_leak', 'critical_thermal', 'supernova', 'black_hole']), ev('downlink'), ev('campaign2'), ev('downlink2'), ev('extend')]
     return items
 
 
@@ -545,6 +547,28 @@ EVENTS = {
                            ch('Extend the mission', dict(cost=20, fuel=-8, sci=10, data=round(S['dpc'] * 0.5, 1)), 'More science. Costs funds and fuel.', creative=True, msg='Bonus science collected.'),
                            ch('Close out on time', {}, 'Bank your results.'),
                            tip='Successful missions often outlive their plan (Voyager, Opportunity, Hubble).'),
+    'critical_leak': lambda: card('Flight Director', 'ALARM: Valve pressure drop', 'A micro-leak was detected in the auxiliary tank. Closing the main valve now saves propellant, but isolates the secondary sensor.', 'alert',
+                                  ch('Isolate main valve', dict(secret_sci=-25, secret_note='Isolating the valve blinded final telemetry, reducing data accuracy.'), 'Keeps current resources.'),
+                                  ch('Maintain flow and compensate', dict(fuel=-8, secret_sci=15, secret_note='Compensating for the leak secured 100% telemetry until end of mission.'), 'Spends fuel now.'),
+                                  tip='Isolation valves prevent total loss, but sacrifice system redundancy.'),
+    'critical_thermal': lambda: card('Thermal Lead', 'CRITICAL: Optical bench drift', 'Uneven solar heating is warping the sensor mount by microns. Active heaters fix it, but drain battery charge right before eclipse.', 'alert',
+                                     ch('Let it stabilize passively', dict(secret_sci=-30, secret_note='Thermal warping blurred the final high-resolution imagery.'), 'Saves battery now.'),
+                                     ch('Engage precision heaters', dict(energy=-55, secret_sci=20, secret_note='Active thermal control preserved razor-sharp optical focus.'), 'Uses battery charge.'),
+                                     tip='Thermal expansion changes focal length: delta_L = alpha * L * delta_T.'),
+    'critical_parity': lambda: card('Software Lead', 'URGENT: Memory parity mismatch', 'Cosmic rays triggered checksum errors in the science buffer. Running a deep scrub takes time, while bypassing it risks silent data corruption.', 'alert',
+                                    ch('Bypass scrub and transmit', dict(secret_sci=-25, secret_note='Corrupted memory packets invalidated a major portion of the dataset.'), 'Fast and free now.'),
+                                    ch('Run full memory scrub', dict(time=0.4, energy=-30, secret_sci=15, secret_note='Error-correcting scrub recovered clean, peer-reviewable science data.'), 'Costs time and energy.'),
+                                    tip='Error-correcting code (ECC) memory detects and fixes single-bit flips from radiation.'),
+    'supernova': lambda: card('Principal Investigator', 'URGENT: Massive stellar core collapse', 'A distant star just went supernova, flooding our sensors with X-rays and gamma bursts. Closing the shutters protects the optics, while keeping them open captures rare high-energy data.', 'alert',
+                              ch('Close shutters for protection', dict(secret_sci=-10, secret_note='Shutting down optics saved the sensors, but missed historic supernova data.'), 'Safe, protects hardware.'),
+                              ch('Record full radiation burst', dict(energy=-45, secret_sci=40, secret_note='Capturing the supernova shockwave yielded breakthrough high-energy science!'), 'High power draw, risks saturation.'),
+                              tip='Core-collapse supernovae release most of their energy in neutrinos and high-energy photons.'),
+    'black_hole': lambda: card('Navigation Lead', 'ANOMALY: Unexplained gravitational lensing', 'Telescopes detected background starlight bending around an invisible, ultra-dense object. Holding the precise pointing lock drains thruster fuel, while letting the craft drift saves propellant.', 'alert',
+                               ch('Conserve fuel and let it drift', dict(secret_sci=-10, secret_note='Conserving attitude fuel broke the pointing lock, missing a rare gravitational lens event.'), 'Saves fuel now.'),
+                               ch('Hold fine pointing lock', dict(fuel=-9, energy=-45, secret_sci=45, secret_note='Sustained pointing lock confirmed a rogue stellar-mass black hole via microlensing!'), 'Drains fuel and battery.'),
+                               tip='Gravitational lensing bends light by theta = 4GM / (c^2 * b) without emitting any light.'),
+
+),
 }
 
 
@@ -572,6 +596,11 @@ def apply_fx(fx, st):
             st['rel'] = max(0.0, min(100.0, st['rel'] + v))
         elif k in ('sci', 'pgen', 'puse'):
             st[k] = max(0.0, st[k] + v)
+        elif k == 'secret_sci':
+            st['hidden_score'] += v
+        elif k == 'secret_note':
+            tipo = 'good' if fx.get('secret_sci', 0) >= 0 else 'bad'
+            st['hidden_notes'].append((tipo, v))
         else:
             st['spent' if k == 'cost' else k] += v      # 'cost' adds to the money spent
 
@@ -759,9 +788,17 @@ def compute_results():
     ret = S['dret'] / S['dgen'] if S['dgen'] > 0 else 0.0
     good = [t for k, t in S['log'] if k == 'good']
     bad = [t for k, t in S['log'] if k == 'bad']
+
+    for k,t in S.get('hidden_notes', []):
+        if k == 'good':
+            good.insert(0,t)
+        else:
+            bad.insert(0,t)
+
     res = dict(science=0.0, cost=0.0, safety=0.0, creativity=0.0, total=0.0, grade='F', fit=fit, ret=ret, parts=[])
     if S['launched']:
-        res['science'] = min(100.0, S['sci'] * fit * (0.4 + 0.6 * ret) / 60 * 100)
+        sci_total = max(0.0, S['sci'] + S.get('hidden_score', 0))
+        res['science'] = min(100.0, sci_total * fit * (0.4 + 0.6 * ret) / 60 * 100)
         res['cost'] = max(0.0, min(100.0, (1 - S['spent'] / S['budget']) * 160))
         pwr = S['pgen'] * (1 - ORB[orbit]['ecl']) / max(1.0, 0.8 * S['puse'])
         parts = [('Reliability', S['rel']),
