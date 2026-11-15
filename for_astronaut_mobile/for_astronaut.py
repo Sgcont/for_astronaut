@@ -34,12 +34,12 @@ DATA_CAP = 120        # onboard memory (Gb)
 FONT_UI = "dejavusans,arial,helvetica,liberationsans"
 FONT_MONO = "dejavusansmono,consolas,couriernew,liberationmono"
 ASSET_FILES = {
-    'simple': 'astronauta-simples.png',
-    'very_angry': 'astronauta-muitobravo.png',
-    'very_happy': 'astronauta-mt-feliz.png',
-    'space': 'astronauta-espaco.png',
-    'angry': 'astronauta-bravo.png',
-    'waving': 'astronauta-acenando.png',
+    'simple': 'simple.png',
+    'very_angry': 'very_angry.png',
+    'very_happy': 'very_happy.png',
+    'space': 'space.png',
+    'angry': 'angry.png',
+    'waving': 'waving.png',
 }
 
 # NASA references used to shape the mission-design flow, orbit model and game
@@ -1272,9 +1272,9 @@ def init():
              h2=pygame.font.SysFont(FONT_UI, 22, bold=True), b=pygame.font.SysFont(FONT_UI, 18, bold=True),
              n=pygame.font.SysFont(FONT_UI, 15), s=pygame.font.SysFont(FONT_UI, 13), m=pygame.font.SysFont(FONT_MONO, 14))
     asset_dir = os.path.dirname(os.path.abspath(__file__))
-    A['menu'] = pygame.image.load(os.path.join(asset_dir, 'menu-completo.png')).convert_alpha()
+    A['menu'] = pygame.image.load(os.path.join(asset_dir, 'assets', 'images', 'menus', 'main_menu.png')).convert_alpha()
     for emotion, filename in ASSET_FILES.items():
-        A[emotion] = pygame.image.load(os.path.join(asset_dir, filename)).convert_alpha()
+        A[emotion] = pygame.image.load(os.path.join(asset_dir, 'assets', 'images', 'astronaut', filename)).convert_alpha()
     new_game()
     G['scene'] = 'title'
 
