@@ -567,8 +567,6 @@ EVENTS = {
                                ch('Conserve fuel and let it drift', dict(secret_sci=-10, secret_note='Conserving attitude fuel broke the pointing lock, missing a rare gravitational lens event.'), 'Saves fuel now.'),
                                ch('Hold fine pointing lock', dict(fuel=-9, energy=-45, secret_sci=45, secret_note='Sustained pointing lock confirmed a rogue stellar-mass black hole via microlensing!'), 'Drains fuel and battery.'),
                                tip='Gravitational lensing bends light by theta = 4GM / (c^2 * b) without emitting any light.'),
-
-),
 }
 
 
@@ -597,10 +595,12 @@ def apply_fx(fx, st):
         elif k in ('sci', 'pgen', 'puse'):
             st[k] = max(0.0, st[k] + v)
         elif k == 'secret_sci':
-            st['hidden_score'] += v
+            if st is S:
+                st['hidden_score'] += v
         elif k == 'secret_note':
-            tipo = 'good' if fx.get('secret_sci', 0) >= 0 else 'bad'
-            st['hidden_notes'].append((tipo, v))
+            if st is S:
+                tipo = 'good' if fx.get('secret_sci', 0) >= 0 else 'bad'
+                st['hidden_notes'].append((tipo, v))
         else:
             st['spent' if k == 'cost' else k] += v      # 'cost' adds to the money spent
 
@@ -1011,6 +1011,8 @@ def draw_side(rect, c, active):
         yy = text(screen, c['note'], F['s'], C_DIM, x + 14, yy, maxw=w - 28, lh=16) + 8
     fx = c['fx']() if callable(c['fx']) else c['fx']
     for k, v in fx.items():
+        if k in ('secret_sci', 'secret_note'):
+            continue
         lab, unit, gs = FXINFO[k]
         col = C_DIM if gs == 0 else (C_GOOD if v * gs > 0 else C_BAD)
         yy = text(screen, f"{lab}: {fmt(v)} {unit}", F['n'], col, x + 14, yy, maxw=w - 28, lh=19)
