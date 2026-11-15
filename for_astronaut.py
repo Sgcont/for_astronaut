@@ -388,6 +388,7 @@ def check_launch():
         S['st'], wet = None, ship
     S['wet'], S['cap_l'] = wet, cap
     if wet <= cap:
+        play_snd('success')
         fit = FIT[S['obj']][S['orbit']]
         lines = [('COMPATIBILITY CHECK: PASSED', C_GOOD),
                  f"{lc['name']} can lift {cap:,.0f} kg to this orbit. Your craft at liftoff: {wet:,.0f} kg.",
@@ -398,10 +399,12 @@ def check_launch():
             lines.append(('Warning: this orbit is a poor match for your objective. Science will be reduced.', C_WARN))
         lines.append(f"Spent so far: {S['spent']:.0f} of {S['budget']} M$.  Schedule: {S['time']:.1f} of {S['deadline']} months.")
         return [banner('PHASE 3/5: ORBIT AND LAUNCHER', 'Launch approved', lines)]
+    play_snd('fail')
     return [card('Launch Integration', 'NOT COMPATIBLE', f"The {lc['name']} lifts {cap:,.0f} kg to this orbit, but your craft weighs {wet:,.0f} kg at liftoff. It cannot reach orbit.", 'alert',
                  ch('Pick another launcher', reset=True, then=launch_chain, note='Refunds the launcher and stage.'),
                  ch('Pick another orbit', reset=True, then=lambda: orbit_cards() + launch_chain(), note='A lower orbit needs less delta-v.'),
                  tip='If mass at liftoff exceeds capacity, the rocket equation says the delta-v is not enough.')]
+
 
 
 # ---------------------------------------------------------------- deck: phase 4
@@ -697,6 +700,7 @@ def advance():
         elif k == 'end':
             compute_results()
             G['scene'] = 'end'
+            play_snd('fail' if S['fail'] or not S['launched'] else 'success')
             return
 
 
@@ -752,6 +756,9 @@ def update_flight(dt):
     fl['debris'] = [d for d in fl['debris'] if d['y'] < H + 150]
     if fl['done']:
         return
+    if not fl.get('snd_started'):
+        fl['snd_started'] = True
+        play_snd('rocket', loops=-1)
     s = fl['stages'][fl['idx']]
     mdot = s['thrust'] / (s['isp'] * G0)
     burn_t = min(dt * fl['factor'] * (3 if pygame.key.get_pressed()[pygame.K_f] else 1), s['left'] / mdot)
@@ -761,24 +768,32 @@ def update_flight(dt):
     fl['dv'] += s['isp'] * G0 * math.log(m_before / m_after)      # Tsiolkovsky, step by step
     fl['t'] += burn_t
     fl['hist'].append((fl['t'], m_after))
+    biggest = max(st['dry'] + st['prop'] for st in fl['stages'])
     if fl['fairing'] and fl['idx'] >= 1 and fl['t'] > fl['fair_t']:
         fl['fairing'] = False
+        top_y = 540 - sum(int(60 + 70 * (fl['stages'][j]['dry'] + fl['stages'][j]['prop']) / biggest)
+                          for j in range(fl['idx'], len(fl['stages'])))
         for sgn in (-1, 1):
-            fl['debris'].append(dict(x=330 + sgn * 14, y=300, vx=sgn * 70, vy=-30, rot=0.0, vr=sgn * 1.5, w=10, h=46, col=(235, 235, 245)))
+            fl['debris'].append(dict(x=330 + sgn * 12, y=top_y - 32, vx=sgn * 65, vy=10, rot=0.0, vr=sgn * 1.4, w=12, h=48, col=(235, 235, 245)))
     if s['left'] <= 1e-6:
-        fl['debris'].append(dict(x=330, y=470, vx=random.choice((-25, 25)), vy=20, rot=0.0, vr=random.choice((-0.8, 0.8)), w=50 - 6 * fl['idx'], h=110, col=(150, 155, 170)))
+        sh = int(60 + 70 * (s['dry'] + s['prop']) / biggest)
+        sw = 56 - 8 * fl['idx'] if fl['mode'] == 'ascent' else 46
+        fl['debris'].append(dict(x=330, y=540 - sh // 2, vx=random.choice((-25, 25)), vy=20, rot=0.0, vr=random.choice((-0.8, 0.8)), w=sw, h=sh, col=(150, 155, 170)))
         fl['idx'] += 1
         fl['hist'].append((fl['t'], fl_mass(fl)))                  # mass drops instantly with the empty tank
         if fl['idx'] == 1 and fl['mode'] == 'ascent':
             fl['fair_t'] = fl['t'] + fl['T'] * 0.04
         if fl['idx'] >= len(fl['stages']):
             fl['done'] = True
+            if 'rocket' in SND:
+                SND['rocket'].fadeout(500)
             if fl['mode'] == 'ascent':
                 S['launched'] = True
                 S['deadline_on'] = False
                 S['log'].append(('good', f"Orbit reached with {fl['dv'] - fl['dv_req']:,.0f} m/s of spare delta-v."))
             else:
                 S['log'].append(('good', 'The transfer burn put the craft on target.'))
+
 
 
 # ---------------------------------------------------------------- results
@@ -1042,17 +1057,33 @@ def draw_hud(pv):
     cur = hud_values(S)
     new = hud_values(pv) if pv else cur
     for i, ((lab, f0, kind, txt0), (_, f1, _, txt1)) in enumerate(zip(cur, new)):
-        x, y, bw = 18 + i * 245, 26, 225
+        x, y, bw, bh = 18 + i * 245, 26, 225, 18
         text(screen, lab, F['s'], C_DIM, x, 6)
-        pygame.draw.rect(screen, (28, 34, 64), (x, y, bw, 16), border_radius=8)
+        pygame.draw.rect(screen, (24, 30, 58), (x, y, bw, bh), border_radius=9)
+        
         d = f1 if kind == 'use' else 1 - f1
         col = C_GOOD if d < 0.7 else C_WARN if d < 0.9 else C_BAD
         a, b = max(0.0, min(1.0, f0)), max(0.0, min(1.0, f1))
-        pygame.draw.rect(screen, col, (x, y, int(bw * min(a, b)), 16), border_radius=8)
-        if a != b:
-            pygame.draw.rect(screen, (255, 255, 255), (x + int(bw * min(a, b)), y, int(bw * abs(a - b)) + 1, 16))
-        pygame.draw.rect(screen, C_BAD if f1 > 1.0 or (kind == 'level' and f1 <= 0) else C_LINE, (x, y, bw, 16), 1, border_radius=8)
-        text(screen, txt1, F['s'], C_TEXT if pv else C_DIM, x, 46)
+        
+        base_w = int(bw * min(a, b))
+        if base_w > 0:
+            pygame.draw.rect(screen, col, (x, y, base_w, bh), border_radius=9)
+        
+        if abs(a - b) > 0.005:
+            diff_x = x + base_w
+            diff_w = max(6, int(bw * abs(a - b)))
+            is_good_change = (b < a) if kind == 'use' else (b > a)
+            proj_col = (140, 255, 175) if is_good_change else (255, 130, 120)
+            pygame.draw.rect(screen, proj_col, (diff_x, y + 2, diff_w, bh - 4), border_radius=6)
+            marker_x = x + int(bw * b)
+            pygame.draw.line(screen, (255, 255, 255), (marker_x, y - 2), (marker_x, y + bh + 2), 2)
+
+        border_col = C_BAD if f1 > 1.0 or (kind == 'level' and f1 <= 0) else C_LINE
+        pygame.draw.rect(screen, border_col, (x, y, bw, bh), 2, border_radius=9)
+        
+        txt_col = C_WARN if (pv and txt0 != txt1) else (C_TEXT if pv else C_DIM)
+        text(screen, txt1, F['s'], txt_col, x, 48)
+
 
 
 # ---------------------------------------------------------------- scenes: draw
@@ -1116,23 +1147,45 @@ def draw_card_scene(t):
         apply_fx(c['fx']() if callable(c['fx']) else c['fx'], pv)
     draw_hud(pv)
     text(screen, G['phase'] + f"     Science: {S['sci']:.0f} pts", F['s'], C_DIM, W // 2, 76, align='center')
-    draw_astronaut(screen, (454, 86, 92, 92), G['emotion'])
-    draw_side((12, 134, 270, 480), it['L'], lean < 0)
-    draw_side((718, 134, 270, 480), it['R'], lean > 0)
-    G['off'] += (lean * 24 - G['off']) * 0.2
+
+    if it.get('art') == 'alert' and not it.get('alarm_played'):
+        it['alarm_played'] = True
+        play_snd('alarm')
+
+
+    if it.get('art') == 'alert' and lean == 0:
+        pose = 'angry'
+    elif lean < 0:
+        pose = 'angry'
+    elif lean > 0:
+        pose = 'very_happy'
+    else:
+        pose = G['emotion']
+
+    draw_astronaut(screen, (456, 96, 88, 88), pose)
+
+    G['off'] += (lean * 18 - G['off']) * 0.2
     if G['fly']:
         f = G['fly']
         p = min(1.0, f['t'] / 0.25)
         cs = render_card(f['item'], f['side'], t)
         cs.set_alpha(int(255 * (1 - p)))
-        screen.blit(pygame.transform.rotate(cs, -f['side'] * 18 * p), cs.get_rect(center=(W // 2 + f['side'] * 520 * p, 374)).move(0, 0))
+        screen.blit(pygame.transform.rotate(cs, -f['side'] * 18 * p), cs.get_rect(center=(W // 2 + f['side'] * 520 * p, 418)))
     else:
         cs = render_card(it, lean, t)
-        screen.blit(pygame.transform.rotate(cs, -G['off'] * 0.22), cs.get_rect(center=(W // 2 + G['off'], 374)))
+        cw, chh = cs.get_size()
+        cs_small = pygame.transform.smoothscale(cs, (int(cw * 0.92), int(chh * 0.92)))
+        screen.blit(pygame.transform.rotate(cs_small, -G['off'] * 0.18), cs_small.get_rect(center=(W // 2 + G['off'], 418)))
+
+    draw_side((12, 180, 276, 460), it['L'], lean < 0)
+    draw_side((712, 180, 276, 460), it['R'], lean > 0)
+
     txt, col, left = G['toast']
     if left > 0 and txt:
-        text(screen, txt, F['b'], col, W // 2, 640, maxw=W - 80, align='center')
+        text(screen, txt, F['b'], col, W // 2, 658, maxw=W - 80, align='center')
     text(screen, 'Left / Right: preview.  Click or press again: choose.  ESC: quit.', F['s'], C_DIM, W // 2, 736, align='center')
+
+
 
 
 def draw_flight(t):
@@ -1261,6 +1314,13 @@ def draw_end(t):
 
 
 # ---------------------------------------------------------------- main loop
+SND = {}
+
+def play_snd(name, loops=0):
+    if name in SND:
+        SND[name].play(loops=loops)
+
+
 def init():
     global screen
     pygame.init()
@@ -1269,13 +1329,40 @@ def init():
     F.update(big=pygame.font.SysFont(FONT_UI, 72, bold=True), h1=pygame.font.SysFont(FONT_UI, 40, bold=True),
              h2=pygame.font.SysFont(FONT_UI, 22, bold=True), b=pygame.font.SysFont(FONT_UI, 18, bold=True),
              n=pygame.font.SysFont(FONT_UI, 15), s=pygame.font.SysFont(FONT_UI, 13), m=pygame.font.SysFont(FONT_MONO, 14))
-    asset_dir = os.path.dirname(os.path.abspath(__file__))
+    asset_dir = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
     A['menu'] = pygame.image.load(os.path.join(asset_dir, 'menu-completo.png')).convert_alpha()
     for emotion, filename in ASSET_FILES.items():
         A[emotion] = pygame.image.load(os.path.join(asset_dir, filename)).convert_alpha()
+    pygame.mixer.init()
+    for key, fname in (('card', 'Card.wav'), ('click', 'Click.wav'), ('rocket', 'Rocket.ogg'), ('success', 'Compatible.wav'), ('fail', 'Failure.wav'), ('alarm', 'Alarm.wav')):
+        p = os.path.join(asset_dir, 'Audios', fname)
+        if os.path.exists(p):
+            snd = pygame.mixer.Sound(p)
+            if key == 'rocket':
+                raw = snd.get_raw()
+                start = int(0.65 * 176400) & ~3
+                end = int(1.55 * 176400) & ~3
+                if len(raw) > start:
+                    snd = pygame.mixer.Sound(buffer=raw[start:min(len(raw), end)])
+            SND[key] = snd
+    if 'card' in SND:
+        SND['card'].set_volume(0.5)
+    if 'rocket' in SND:
+        SND['rocket'].set_volume(0.5)
+    if 'success' in SND:
+        SND['success'].set_volume(0.7)
+    if 'fail' in SND:
+        SND['fail'].set_volume(0.7)
+    if 'alarm' in SND:
+        SND['alarm'].set_volume(0.65)
+    music_path = os.path.join(asset_dir, 'Audios', 'Theme.ogg')
+    if os.path.exists(music_path):
+        pygame.mixer.music.load(music_path)
+        pygame.mixer.music.set_volume(0.18)
+        pygame.mixer.music.play(-1)
+    
     new_game()
     G['scene'] = 'title'
-
 
 def update(dt, events):
     """Advance the game. Returns False when the player quits."""
@@ -1293,27 +1380,37 @@ def update(dt, events):
             return False
         go = e.type == pygame.KEYDOWN and e.key in (pygame.K_SPACE, pygame.K_RETURN)
         if sc == 'title' and (go or (e.type == pygame.MOUSEBUTTONDOWN and menu_play_rect().collidepoint(e.pos))):
+            play_snd('click')
             new_game()
             advance()
         elif sc == 'banner' and (go or e.type == pygame.MOUSEBUTTONDOWN):
+            play_snd('click')
             advance()
         elif sc == 'flight' and (go or e.type == pygame.MOUSEBUTTONDOWN) and G['fl']['done']:
+            play_snd('click')
             advance()
         elif sc == 'end' and e.type == pygame.KEYDOWN and e.key == pygame.K_r:
+            play_snd('click')
             new_game()
             advance()
         elif sc == 'card' and not G['fly']:
             if e.type == pygame.MOUSEMOTION:
-                G['lean'] = -1 if e.pos[0] < W // 2 - 60 else 1 if e.pos[0] > W // 2 + 60 else 0
+                new_lean = -1 if e.pos[0] < W // 2 - 60 else 1 if e.pos[0] > W // 2 + 60 else 0
+                if new_lean != 0 and new_lean != G['lean']:
+                    play_snd('card')
+                G['lean'] = new_lean
             elif e.type == pygame.MOUSEBUTTONDOWN and e.button == 1:
                 side = -1 if e.pos[0] < W // 2 else 1
                 G['lean'] = side
+                play_snd('click')
                 choose(side)
             elif e.type == pygame.KEYDOWN and e.key in (pygame.K_LEFT, pygame.K_a, pygame.K_RIGHT, pygame.K_d):
                 side = -1 if e.key in (pygame.K_LEFT, pygame.K_a) else 1
                 if G['lean'] == side:
+                    play_snd('click')
                     choose(side)       # second press confirms
                 else:
+                    play_snd('card')
                     G['lean'] = side   # first press previews
     return True
 
