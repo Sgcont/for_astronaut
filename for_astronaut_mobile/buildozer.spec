@@ -9,8 +9,8 @@ requirements = python3,pygame
 orientation = landscape
 fullscreen = 1
 android.api = 33
+android.archs = arm64-v8a
 
 [buildozer]
 log_level = 2
 warn_on_root = 0
-
