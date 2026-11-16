@@ -71,6 +71,32 @@ buildozer android debug             # APK is written to for_astronaut_mobile/bin
 `for_astronaut_mobile/` and its sub-folders, which includes
 `assets/images/`.
 
+## The user manual
+
+The manual exists in three forms with the same content:
+
+| File | Role |
+|---|---|
+| `docs/manual.md` | Source of truth; read it on GitHub |
+| `docs/manual.pdf` | Laid-out version for reading and printing, **generated** from `manual.md` (never edited by hand) |
+| `docs/manual.tex` | LaTeX version, so anyone can rebuild a PDF from the repository with a standard TeX distribution |
+
+`manual.pdf` is produced by a small Markdown-to-PDF script (Python `markdown` +
+WeasyPrint) that is kept outside this repository. To rebuild a PDF from the
+repository alone, use the LaTeX version:
+
+```bash
+latexmk -pdf -outdir=build docs/manual.tex     # PDF in build/manual.pdf
+```
+
+When the manual changes, edit `manual.md`, mirror the change in `manual.tex`
+and regenerate `manual.pdf`.
+
+Both layouts follow the game's visual identity: navy `#1B1441` background,
+violet `#614AD3` (the menu buttons), yellow `#FFFF00` (the `_` in the logo),
+pixel stars and the pixel-art astronaut `assets/images/astronaut/waving.png`
+on the cover. NASA branding is not used.
+
 ## Conventions
 
 - Code, comments, documentation and file names in English.

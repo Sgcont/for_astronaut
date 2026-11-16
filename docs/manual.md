@@ -89,3 +89,9 @@ that never launches gets **F**.
 | `FileNotFoundError` for a `.png` file at start-up | The `assets/` folder is missing or incomplete; download the whole repository |
 | The game runs but is silent | The files in `assets/audio/` are missing, or the computer has no audio output; the game still works without sound |
 | The window does not fit the screen | Use the online version or the mobile layout, which scales to the screen |
+
+---
+
+*This manual was written with AI assistance (Claude Code) and reviewed by the
+team. The PDF version is generated from this file; a LaTeX version is in
+`docs/manual.tex`. See `docs/ai_usage.md`.*
