@@ -32,12 +32,12 @@ DATA_CAP = 120        # onboard memory (Gb)
 FONT_UI = "dejavusans,arial,helvetica,liberationsans"
 FONT_MONO = "dejavusansmono,consolas,couriernew,liberationmono"
 ASSET_FILES = {
-    'simple': 'astronauta-simples.png',
-    'very_angry': 'astronauta-muitobravo.png',
-    'very_happy': 'astronauta-mt-feliz.png',
-    'space': 'astronauta-espaco.png',
-    'angry': 'astronauta-bravo.png',
-    'waving': 'astronauta-acenando.png',
+    'simple': 'simple.png',
+    'very_angry': 'very_angry.png',
+    'very_happy': 'very_happy.png',
+    'space': 'space.png',
+    'angry': 'angry.png',
+    'waving': 'waving.png',
 }
 
 # NASA references used to shape the mission-design flow, orbit model and game
@@ -1349,16 +1349,16 @@ def init():
              h2=pygame.font.SysFont(FONT_UI, 22, bold=True), b=pygame.font.SysFont(FONT_UI, 18, bold=True),
              n=pygame.font.SysFont(FONT_UI, 15), s=pygame.font.SysFont(FONT_UI, 13), m=pygame.font.SysFont(FONT_MONO, 14))
     asset_dir = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
-    A['menu'] = pygame.image.load(os.path.join(asset_dir, 'menu-completo.png')).convert_alpha()
-    A['how_page'] = pygame.image.load(os.path.join(asset_dir, 'menu_modos', 'pag1-howitworks.png')).convert_alpha()
-    A['how_btn'] = pygame.image.load(os.path.join(asset_dir, 'menu_modos', 'botao-howitworks.png')).convert_alpha()
-    A['how_btn_pressed'] = pygame.image.load(os.path.join(asset_dir, 'menu_modos', 'apertado-howitworks.png')).convert_alpha()
+    A['menu'] = pygame.image.load(os.path.join(asset_dir, 'assets', 'images', 'menus', 'main_menu.png')).convert_alpha()
+    A['how_page'] = pygame.image.load(os.path.join(asset_dir, 'assets', 'images', 'how_it_works', 'page_1.png')).convert_alpha()
+    A['how_btn'] = pygame.image.load(os.path.join(asset_dir, 'assets', 'images', 'how_it_works', 'button.png')).convert_alpha()
+    A['how_btn_pressed'] = pygame.image.load(os.path.join(asset_dir, 'assets', 'images', 'how_it_works', 'button_pressed.png')).convert_alpha()
 
     for emotion, filename in ASSET_FILES.items():
-        A[emotion] = pygame.image.load(os.path.join(asset_dir, filename)).convert_alpha()
+        A[emotion] = pygame.image.load(os.path.join(asset_dir, 'assets', 'images', 'astronaut', filename)).convert_alpha()
     pygame.mixer.init()
-    for key, fname in (('card', 'Card.wav'), ('click', 'Click.wav'), ('rocket', 'Rocket.ogg'), ('success', 'Compatible.wav'), ('fail', 'Failure.wav'), ('alarm', 'Alarm.wav')):
-        p = os.path.join(asset_dir, 'Audios', fname)
+    for key, fname in (('card', 'card.wav'), ('click', 'click.wav'), ('rocket', 'rocket.ogg'), ('success', 'compatible.wav'), ('fail', 'failure.wav'), ('alarm', 'alarm.wav')):
+        p = os.path.join(asset_dir, 'assets', 'audio', fname)
         if os.path.exists(p):
             snd = pygame.mixer.Sound(p)
             if key == 'rocket':
@@ -1378,7 +1378,7 @@ def init():
         SND['fail'].set_volume(0.7)
     if 'alarm' in SND:
         SND['alarm'].set_volume(0.65)
-    music_path = os.path.join(asset_dir, 'Audios', 'Theme.ogg')
+    music_path = os.path.join(asset_dir, 'assets', 'audio', 'theme.ogg')
     if os.path.exists(music_path):
         pygame.mixer.music.load(music_path)
         pygame.mixer.music.set_volume(0.18)
