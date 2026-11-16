@@ -63,6 +63,11 @@ docs/                    Architecture, assets, development guide and AI usage
 python -m unittest discover -s tests -v
 ```
 
+## Credits
+
+Sounds and music come from Freesound and OpenGameArt (CC0 and CC BY). Authors,
+links and licences are listed in [`CREDITS.md`](CREDITS.md).
+
 ## Documentation
 
 See [`docs/`](docs/README.md), including the record of how AI was and was not
