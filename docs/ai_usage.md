@@ -12,7 +12,7 @@ what it did not do.
 |---|---|
 | AI must not be used to come up with the solution idea | The challenge, the game concept and the design were decided by the team (see [Origin of the idea](#origin-of-the-idea)) |
 | AI-generated code and data must be acknowledged in the description and in metadata | Listed below and in the project description on the Space Apps site |
-| AI-generated images and videos must carry a visible watermark | The slides that used AI carry a notice in their footer |
+| AI-generated images and videos must carry a visible watermark | The slides that used AI carry a notice in their footer; so does `assets/images/how_it_works/page_1.png` |
 | AI-generated audio must be acknowledged | See [Declared AI use by the team](#declared-ai-use-by-the-team) |
 | AI content must not use or modify NASA branding | No NASA logo or insignia is used or generated |
 
@@ -56,6 +56,8 @@ What the AI did:
 - Added `.gitignore`, a root `requirements.txt` and the automated tests in
   `tests/`.
 - Wrote the documentation in `docs/`.
+- Merged the latest `main` into the branch and moved the three new
+  "how it works" images to the new layout (files unchanged).
 
 What the AI did **not** do:
 

@@ -11,6 +11,7 @@ for_astronaut/
 │   │   ├── astronaut/          # Pixel-art astronaut, one file per emotion
 │   │   ├── menus/              # Title screen artwork
 │   │   ├── mission_modes/      # "Choose your mission" menu pieces
+│   │   ├── how_it_works/       # "How it works" pages
 │   │   ├── difficulty/         # Difficulty menu pieces
 │   │   ├── scenery/            # Earth, Moon and rocket backgrounds
 │   │   └── player_count/       # Reserved for a future player-count menu
@@ -19,7 +20,7 @@ for_astronaut/
 │   ├── main.py                 # Buildozer entry point (imports for_astronaut.main)
 │   ├── for_astronaut.py        # Mobile copy of the game
 │   ├── buildozer.spec          # Android packaging settings
-│   └── assets/images/          # Same images as the desktop edition
+│   └── assets/images/          # Copy of the desktop images it ships
 ├── tests/                      # Headless automated tests
 ├── docs/                       # This documentation
 └── .github/workflows/android.yml   # CI job that builds the APK
