@@ -21,10 +21,25 @@ giving credit, which this section does.
 
 ## Artwork
 
+Original artwork by **Irene Mothio**, licensed under
+[CC BY 4.0](https://creativecommons.org/licenses/by/4.0/): anyone may reuse it
+with credit to the author.
+
 | Assets | Author | Licence |
 |---|---|---|
-| Pixel-art astronaut, menus, mission modes, difficulty and scenery (`assets/images/`) | Irene Mothio | *Pending the author's confirmation* |
-| "How it works" page (`assets/images/how_it_works/page_1.png`) | Layout generated with AI (Claude) from original designs by Irene Mothio | *Pending the author's confirmation* |
+| Pixel-art astronaut, six emotions (`assets/images/astronaut/`) | Irene Mothio | CC BY 4.0 |
+| Title screen (`assets/images/menus/main_menu.png`) | Irene Mothio | CC BY 4.0 |
+| Mission-mode, difficulty and "how it works" buttons and titles (`assets/images/mission_modes/`, `assets/images/difficulty/`, `assets/images/how_it_works/button*.png`) | Irene Mothio | CC BY 4.0 |
+| Scene frames (`assets/images/scenery/*_scene.png`, `game_frame.png`) | Irene Mothio; the photos inside them are listed below | CC BY 4.0 (frames only) |
+| "How it works" page (`assets/images/how_it_works/page_1.png`) | Layout generated with AI (Claude) from original designs by Irene Mothio; the notice is printed on the image | CC BY 4.0 |
+
+### Third-party photos (not used by the game yet)
+
+| File | Content | Source | Licence |
+|---|---|---|---|
+| `assets/images/scenery/earth_background.png` | Earth seen from orbit | *To be confirmed* | *To be confirmed* |
+| `assets/images/scenery/moon_background.png` | Earth rising over the lunar surface | *To be confirmed* | *To be confirmed* |
+| `assets/images/scenery/rocket_background.png` | Spacecraft cockpit; **shows the NASA insignia** | *To be confirmed* | *To be confirmed* |
 
 ## NASA resources
 

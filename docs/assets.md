@@ -64,8 +64,9 @@ listed, even free ones. The full credits, with links, are in
 
 | Asset group | Author / source | Licence | Confirmed |
 |---|---|---|---|
-| Astronaut pixel art, menus, mission modes, difficulty, scenery | Irene Mothio | | Pending |
-| "How it works" page (`how_it_works/page_1.png`) | Layout generated with AI (Claude) from original designs by Irene (notice on the image) | | Pending |
+| Astronaut pixel art, title screen, mission modes, difficulty, "how it works" buttons, scene frames | Irene Mothio | CC BY 4.0 | Yes |
+| "How it works" page (`how_it_works/page_1.png`) | Layout generated with AI (Claude) from original designs by Irene (notice on the image) | CC BY 4.0 | Yes |
+| Photos in `scenery/*_background.png` (and inside the `*_scene.png` frames) | Third party, source to be confirmed; `rocket_background.png` shows the NASA insignia | To be confirmed | **No**: not used by the game; confirm before using |
 | `theme.ogg` | Yoiyami (OpenGameArt) | CC0 1.0 | Yes |
 | `card.wav`, `click.wav`, `rocket.ogg` | el_boss, SignatureSoundsOrg, derplayer (Freesound) | CC0 1.0 | Yes |
 | `compatible.wav` | grunz (Freesound) | CC BY 3.0, credit required | Yes |
