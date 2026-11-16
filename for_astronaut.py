@@ -1455,7 +1455,6 @@ def update(dt, events):
 
 def draw(t):
     {'title': draw_title, 'how': draw_how, 'banner': draw_banner, 'card': draw_card_scene, 'flight': draw_flight, 'end': draw_end}[G['scene']](t)
-    pygame.display.flip()
 
 
 def main():
