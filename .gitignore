@@ -13,6 +13,14 @@ dist/
 for_astronaut_mobile/bin/
 for_astronaut_mobile/.buildozer/
 
+# LaTeX build files
+*.aux
+*.fdb_latexmk
+*.fls
+*.log
+*.out
+*.toc
+
 # Editors and OS files
 .vscode/
 .idea/

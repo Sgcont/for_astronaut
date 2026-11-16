@@ -5,7 +5,7 @@ Documentation for **for_astronaut**, the Space Mission Design Game built by team
 
 | Document | What it covers |
 |---|---|
-| [manual.md](manual.md) | User manual: installing, controls, the five phases and reading the results |
+| [manual.md](manual.md) · [manual.pdf](manual.pdf) · [manual.tex](manual.tex) | User manual: installing, controls, the five phases and reading the results. The PDF is generated from `manual.md`; `manual.tex` is the same manual in LaTeX |
 | [architecture.md](architecture.md) | Repository layout, the desktop and mobile editions, how the game finds its assets |
 | [assets.md](assets.md) | Catalogue of every image and sound, its path, whether the code uses it, authorship and licence |
 | [development.md](development.md) | Setting up, running, testing and packaging the game |

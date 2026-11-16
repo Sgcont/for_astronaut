@@ -24,8 +24,8 @@ is not used yet was delivered for menus planned for later versions.
 | `mission_modes/earth_button_pressed.png` | `menu_modos/apertado-earth.png` | "Observe Earth" button, pressed | Not yet |
 | `mission_modes/study_moon_button.png` | `menu_modos/botao-study-moon.png` | "Study the Moon" button | Not yet |
 | `mission_modes/moon_button_pressed.png` | `menu_modos/apertado-moon.png` | "Study the Moon" button, pressed | Not yet |
-| `mission_modes/how_it_works_button.png` | `menu_modos/botao-howitworks.png` | "How it works" button | Not yet |
-| `mission_modes/how_it_works_button_pressed.png` | `menu_modos/apertado-howitworks.png` | "How it works" button, pressed | Not yet |
+| `how_it_works/button.png` | `menu_modos/botao-howitworks.png` | "How it works" button | Not yet |
+| `how_it_works/button_pressed.png` | `menu_modos/apertado-howitworks.png` | "How it works" button, pressed | Not yet |
 | `how_it_works/page_1.png` | `menu_modos/pag1-howitworks.png` | "How it works" page 1 (trade-offs: cost, mass, schedule). Carries the notice *Layout generated with AI (Claude) from original designs by Irene* | Not yet |
 | `difficulty/configure_mission_difficulty.png` | `dificuldades/configurate mission dificuty.png` | "Configure mission difficulty" title | Not yet |
 | `difficulty/difficulty_menu.png` | `dificuldades/menu-dificuldade.png` | Difficulty menu background | Not yet |

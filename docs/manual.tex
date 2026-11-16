@@ -1,0 +1,222 @@
+% for_astronaut — user manual (LaTeX version)
+%
+% LaTeX edition of docs/manual.md, with the same content. It documents where the
+% PDF manual comes from and lets anyone rebuild a PDF with a standard TeX
+% distribution:
+%
+%     latexmk -pdf -outdir=build docs/manual.tex
+%
+% Written with AI assistance (Claude Code); see docs/ai_usage.md.
+% Keep it in sync with docs/manual.md whenever the manual changes.
+
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\renewcommand{\familydefault}{\sfdefault}  % sans-serif body, like the game UI
+\usepackage[margin=2.2cm]{geometry}
+\usepackage[table]{xcolor}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage{fancyvrb}
+\usepackage{fancyhdr}
+\usepackage{graphicx}
+\usepackage{tikz}
+\usepackage[explicit]{titlesec}
+\usepackage[hidelinks]{hyperref}
+
+% The images are looked up from the repository root or from docs/.
+\graphicspath{{./}{../}}
+
+\hypersetup{
+  pdftitle    = {for_astronaut --- user manual},
+  pdfauthor   = {for_code UFRJ},
+  pdfsubject  = {Written with AI assistance (Claude Code) and reviewed by the team. See docs/ai_usage.md.},
+  pdfkeywords = {AI-assisted, Claude Code, NASA Space Apps 2026},
+}
+
+% Palette of the game art: navy background, violet buttons, yellow "_" in the logo.
+\definecolor{navy}{HTML}{1B1441}
+\definecolor{violet}{HTML}{614AD3}
+\definecolor{logoyellow}{HTML}{FFFF00}
+\definecolor{stargrey}{HTML}{322A3C}
+\definecolor{softgrey}{HTML}{B9B4D6}
+\colorlet{accent}{violet}
+
+% Sections look like the violet menu buttons, with a yellow edge.
+\titleformat{\section}
+  {\normalfont\large\bfseries\color{white}}
+  {}{0pt}
+  {\colorbox{violet}{\parbox{\dimexpr\textwidth-2\fboxsep}{\strut\color{logoyellow}\rule[-0.35em]{0.8em}{1.35em}\hspace{0.6em}\color{white}\thesection.\ #1}}}
+\titlespacing*{\section}{0pt}{1.6em}{0.8em}
+
+% A pixel "star" like the ones in the menu background.
+\newcommand{\pixstar}[3]{% x (mm), y (mm), pixel size (mm)
+  \fill[stargrey] ({#1*1mm},{#2*1mm}) rectangle ++({#3*1mm},{#3*1mm});
+  \fill[stargrey] ({(#1-#3)*1mm},{(#2-#3)*1mm}) rectangle ++({#3*1mm},{#3*1mm});
+  \fill[stargrey] ({(#1+#3)*1mm},{(#2-#3)*1mm}) rectangle ++({#3*1mm},{#3*1mm});
+  \fill[stargrey] ({#1*1mm},{(#2-2*#3)*1mm}) rectangle ++({#3*1mm},{#3*1mm});}
+\newcommand{\key}[1]{\texttt{#1}}
+\newcommand{\hd}[1]{\textcolor{white}{\textbf{#1}}}   % table header cell (navy row)
+\newcolumntype{L}{>{\raggedright\arraybackslash}X}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.6em}
+\fvset{frame=leftline,rulecolor=\color{violet},framerule=1mm,framesep=3mm,fontsize=\small}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\bfseries\color{violet}for\_astronaut}
+\fancyhead[R]{\small for\_code UFRJ}
+\fancyfoot[C]{\small\bfseries\color{navy}\thepage}
+
+\begin{document}
+
+% ------------------------------------------------------------------ cover
+% Same look as the game's title screen: navy background, pixel stars,
+% white logo with a yellow "_" and the pixel-art astronaut.
+\begin{titlepage}
+\begin{tikzpicture}[remember picture, overlay, shift={(current page.south west)}]
+  \fill[navy] (0,0) rectangle (210mm,297mm);
+  \pixstar{18}{275}{6}  \pixstar{150}{267}{4} \pixstar{172}{227}{6}
+  \pixstar{34}{179}{4}  \pixstar{120}{147}{6} \pixstar{182}{101}{4}
+  \pixstar{12}{65}{6}   \pixstar{96}{35}{4}   \pixstar{60}{237}{4}
+  \node[anchor=north west, text width=150mm, inner sep=0] at (22mm,215mm) {%
+    {\color{logoyellow}\bfseries\sffamily\small U\,S\,E\,R\quad M\,A\,N\,U\,A\,L}\\[4mm]
+    {\color{white}\bfseries\sffamily\fontsize{40}{44}\selectfont for{\color{logoyellow}\_}astronaut}\\[7mm]
+    \colorbox{violet}{\parbox{110mm}{\vspace{2mm}\color{white}\sffamily
+      How to install, start and play for\_astronaut, the space-mission design
+      card game: plan a science mission, build the spacecraft, pick an orbit
+      and a launcher, fly it and read your score.\vspace{2mm}}}};
+  \node[anchor=south east, inner sep=0] at (188mm,40mm)
+    {\includegraphics[width=52mm]{assets/images/astronaut/waving.png}};
+  \node[anchor=south west, inner sep=0] at (22mm,16mm)
+    {\color{softgrey}\sffamily\scriptsize for\_code UFRJ $\cdot$ NASA Space Apps Challenge 2026 $\cdot$ LaTeX version of \texttt{docs/manual.md}};
+\end{tikzpicture}
+\end{titlepage}
+
+{\hypersetup{linkcolor=navy}\tableofcontents}
+\clearpage
+
+\section{Play online}
+
+Open \url{https://buenosaas.itch.io/for-astronaut} in a browser and press
+\textbf{Play}. Nothing needs to be installed.
+
+\section{Run on your computer}
+
+You need Python 3.10 or newer.
+
+\begin{Verbatim}
+python -m pip install -r requirements.txt
+python for_astronaut.py
+\end{Verbatim}
+
+A 1000x760 window opens with the title screen and the theme music.
+
+To try the landscape mobile layout on a computer:
+
+\begin{Verbatim}
+python for_astronaut_mobile/main.py
+\end{Verbatim}
+
+\section{Controls}
+
+\begin{tabularx}{\textwidth}{@{}LLLL@{}}
+\toprule
+\rowcolor{navy}\hd{Action} & \hd{Mouse} & \hd{Keyboard} & \hd{Touch (mobile)} \\
+\midrule
+Start from the title screen & Click \textbf{PLAY} & \key{Space} or \key{Enter} & Tap \textbf{PLAY} \\
+Preview an option & Move the mouse to the left or right half & $\leftarrow$ / $\rightarrow$ or \key{A} / \key{D} & Tap a side \\
+Choose the previewed option & Click & Press the same key again & Tap the same side again \\
+Continue a briefing or a finished flight & Click & \key{Space} or \key{Enter} & Tap \\
+Restart on the results screen & --- & \key{R} & --- \\
+Quit & Close the window & \key{Esc} & --- \\
+\bottomrule
+\end{tabularx}
+
+\section{How a mission works}
+
+Each card shows two options. Each option has a good \textbf{and} a bad side,
+and the numbers on the card tell you how it changes your budget, mass, power,
+schedule and science.
+
+\begin{enumerate}[leftmargin=*]
+  \item \textbf{Mission briefing}: choose the science objective and the program
+        difficulty. The briefing sets your budget, dry-mass limit and deadline.
+  \item \textbf{Spacecraft assembly}: pick the structure, power, attitude
+        control, computer, communications and instruments. Watch the status
+        bar: dry mass against its limit, cost against budget, power used
+        against power generated.
+  \item \textbf{Orbit and launcher}: choose the orbit (low Earth, polar,
+        geostationary or lunar) and the launcher. The compatibility check
+        compares what the launcher can lift to that orbit with your
+        spacecraft's mass at liftoff.
+        \begin{itemize}
+          \item \textbf{PASSED}: you see the margin and how well the orbit fits
+                your objective.
+          \item \textbf{NOT COMPATIBLE}: the craft is too heavy for that
+                launcher and orbit.
+        \end{itemize}
+  \item \textbf{Mission simulation}: watch the launch. Empty stages drop away
+        and the rocket gets lighter. Then handle the events of the flight,
+        including \textbf{critical events} (marked with an alarm) whose outcome
+        is hidden until you choose. Keep an eye on battery, propellant and
+        onboard data.
+  \item \textbf{Results}: read your scores and the feedback on what worked and
+        what did not.
+\end{enumerate}
+
+\section{Reading the results}
+
+\begin{tabularx}{\textwidth}{@{}lL@{}}
+\toprule
+\rowcolor{navy}\hd{Score} & \hd{What raises it} \\
+\midrule
+Science (40\%)    & Instruments, an orbit that fits the objective, and data actually sent to Earth \\
+Cost (20\%)       & Money left in the budget \\
+Safety (25\%)     & Reliability and margins of power, mass, launcher capacity and fuel \\
+Creativity (15\%) & Bold or unusual choices \\
+\bottomrule
+\end{tabularx}
+
+The weighted total gives a grade: \textbf{S} (85 or more), \textbf{A} (70),
+\textbf{B} (55), \textbf{C} (40) or \textbf{D} (below 40). A failed mission
+halves the total. A spacecraft that never launches gets \textbf{F}.
+
+\section{Tips}
+
+\begin{itemize}[leftmargin=*]
+  \item More mass needs more fuel, which needs a bigger rocket, which costs
+        more and takes longer. Saving on one of cost, mass or schedule usually
+        costs you on another.
+  \item A powerful instrument is useless if the antenna cannot send its data
+        home.
+  \item Leave margin: a craft right at the mass or power limit has nothing left
+        when an event goes wrong.
+\end{itemize}
+
+\section{Common problems}
+
+\begin{tabularx}{\textwidth}{@{}LL@{}}
+\toprule
+\rowcolor{navy}\hd{Problem} & \hd{Fix} \\
+\midrule
+\texttt{ModuleNotFoundError: No module named 'pygame'} & Run \texttt{python -m pip install -r requirements.txt} \\
+\texttt{FileNotFoundError} for a \texttt{.png} file at start-up & The \texttt{assets/} folder is missing or incomplete; download the whole repository \\
+The game runs but is silent & The files in \texttt{assets/audio/} are missing, or the computer has no audio output; the game still works without sound \\
+The window does not fit the screen & Use the online version or the mobile layout, which scales to the screen \\
+\bottomrule
+\end{tabularx}
+
+\vfill
+\noindent\rule{\textwidth}{0.4pt}
+
+{\small\itshape This manual was written with AI assistance (Claude Code) and
+reviewed by the team. The PDF version is generated from
+\texttt{docs/manual.md}; this LaTeX version has the same content. See
+\texttt{docs/ai\_usage.md}.}
+
+\end{document}
