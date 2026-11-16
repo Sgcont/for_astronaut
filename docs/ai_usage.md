@@ -12,7 +12,7 @@ what it did not do.
 |---|---|
 | AI must not be used to come up with the solution idea | The challenge, the game concept and the design were decided by the team (see [Origin of the idea](#origin-of-the-idea)) |
 | AI-generated code and data must be acknowledged in the description and in metadata | Listed below and in the project description on the Space Apps site |
-| AI-generated images and videos must carry a visible watermark | The slides that used AI carry a notice in their footer; so does `assets/images/how_it_works/page_1.png` |
+| AI-generated images and videos must carry a visible watermark | Every slide of the presentation carries *"Slides generated (with changes) with AI (Claude) from original designs by Irene"*; `assets/images/how_it_works/page_1.png` carries *"Layout generated with AI (Claude) from original designs by Irene"* |
 | AI-generated audio must be acknowledged | See [Declared AI use by the team](#declared-ai-use-by-the-team) |
 | AI content must not use or modify NASA branding | No NASA logo or insignia is used or generated |
 
@@ -33,8 +33,8 @@ The idea is the team's own:
 | Member | Tool | What AI did | What the person did |
 |---|---|---|---|
 | Lucas Contreiras | Claude, GitHub Copilot | Generated the main game code from the team's design and helped with the Android build scripts | Defined the phases and mechanics, reviewed and integrated the code |
-| Irene Mothio | Claude | Helped polish the main menu and turn her designs into the story slides | Drew all the pixel art by hand; designed the menus and slides |
-| Rafael Bueno | *To be confirmed* | | |
+| Irene Mothio | Claude | Generated the presentation slides and the "how it works" page layout from her designs, and helped polish the main menu. Declared on every slide: *"Slides generated (with changes) with AI (Claude) from original designs by Irene"* | Drew all the pixel art by hand; designed the menus and slides; edited the AI output |
+| Rafael Bueno (PO) | — | No individual AI use declared. The presentation credits the code, UI design and pixel art to the team (*"Code, UI design and pixel art made by the team"*), and the team-level declaration on the Space Apps project page applies | Product owner; Reigns-style card mechanic; the five critical events (pull request #3); sound effects and music; web build on itch.io; project page texts |
 | Ronivaldo Andrade | Claude Code | See the log below | Requested, reviewed and approved each change |
 
 ## AI contribution log
@@ -124,4 +124,5 @@ How the result was checked: ...
 > critical events were created by the team. The team reviewed and validated
 > all AI-assisted material.
 
-Update this text when the table above is completed.
+The presentation slides (7 slides, Google Slides) carry the AI notice on every
+slide, as listed in [Rules we follow](#rules-we-follow).
