@@ -21,6 +21,7 @@ EDITIONS = {
     'mobile': os.path.join(ROOT, 'for_astronaut_mobile', 'for_astronaut.py'),
 }
 IMAGES = {'menu', 'simple', 'very_angry', 'very_happy', 'space', 'angry', 'waving'}
+HOW_IT_WORKS = {'how_page', 'how_btn', 'how_btn_pressed'}   # desktop only
 GAMES = 5
 
 
@@ -61,7 +62,8 @@ class SmokeTest(unittest.TestCase):
     def check_edition(self, name):
         game = load(name, EDITIONS[name])
         game.init()
-        self.assertEqual(set(game.A), IMAGES)
+        expected = IMAGES | HOW_IT_WORKS if name == 'desktop' else IMAGES
+        self.assertEqual(set(game.A), expected)
         if hasattr(game, 'SND'):
             self.assertEqual(set(game.SND), {'card', 'click', 'rocket', 'success', 'fail', 'alarm'})
             self.assertTrue(pygame.mixer.music.get_busy(), 'theme music did not start')
@@ -73,6 +75,35 @@ class SmokeTest(unittest.TestCase):
 
     def test_mobile(self):
         self.check_edition('mobile')
+
+    def test_how_it_works_screen(self):
+        """Desktop title menu: HOW IT WORKS opens the guide; click, Space or Esc return."""
+        game = load('desktop', EDITIONS['desktop'])
+        game.init()
+        click = lambda pos: pygame.event.Event(pygame.MOUSEBUTTONDOWN, pos=pos, button=1)
+        key = lambda k: pygame.event.Event(pygame.KEYDOWN, key=k)
+        how, play = game.menu_how_rect(), game.menu_play_rect()
+        self.assertFalse(how.colliderect(play))
+        for back in (click((5, 5)), key(pygame.K_SPACE), key(pygame.K_ESCAPE)):
+            game.G['scene'] = 'title'
+            game.update(0.016, [click(how.center)])
+            self.assertEqual(game.G['scene'], 'how')
+            game.draw(0.0)
+            self.assertTrue(game.update(0.016, [back]), 'Esc on the guide must not quit')
+            self.assertEqual(game.G['scene'], 'title')
+        # The guide page ends with the AI watermark required by Space Apps; the
+        # blinking hint must never cover it (bottom 30 px identical, hint on or off).
+        game.G['scene'] = 'how'
+        band = lambda: pygame.image.tobytes(game.screen.subsurface((0, game.H - 30, game.W, 30)), 'RGB')
+        game.draw(0.0)
+        hint_on = band()
+        game.draw(0.6)
+        self.assertEqual(hint_on, band(), 'the hint covers the AI watermark')
+        game.G['scene'] = 'title'
+        self.assertFalse(game.update(0.016, [key(pygame.K_ESCAPE)]), 'Esc on the title quits')
+        game.G['scene'] = 'title'
+        game.update(0.016, [click(play.center)])
+        self.assertNotEqual(game.G['scene'], 'title')
 
 
 if __name__ == '__main__':

@@ -98,6 +98,26 @@ How the result was checked: the PDF (5 pages) and the LaTeX build (3 pages,
 `latexmk` without errors or warnings) were rendered and reviewed; links in the
 documentation resolve; the automated tests still pass.
 
+### 2026-11-15 — Integrating the HOW IT WORKS screen (Claude Code)
+
+**Requested by:** Ronivaldo Andrade. **Branch:** `feat/how-it-works`.
+
+The feature itself (button, guide screen and navigation) was written by Rafael
+in his own commit. What the AI did:
+
+- Merged his work, written before the asset reorganisation, and pointed his
+  three images to the new paths.
+- Moved the "return" hint so it no longer covers the AI watermark on the guide
+  page, and removed a duplicated `pygame.display.flip()`.
+- Added a test for the new screen and updated the asset docs and the manual.
+
+What the AI did **not** do: it did not change the design or the behaviour of
+the feature, or anything in the gameplay.
+
+How the result was checked: 5 automated tests; every gameplay frame of 15
+seeded games was byte-identical to `main` in both editions; the title and
+guide screens were reviewed visually.
+
 ## Template for new entries
 
 ```markdown

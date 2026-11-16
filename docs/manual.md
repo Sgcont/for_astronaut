@@ -29,13 +29,18 @@ python for_astronaut_mobile/main.py
 | Action | Mouse | Keyboard | Touch (mobile) |
 |---|---|---|---|
 | Start from the title screen | Click **PLAY** | `Space` or `Enter` | Tap **PLAY** |
+| Open the "How it works" guide (desktop) | Click **HOW IT WORKS** | — | — |
+| Close the guide | Click anywhere | `Space`, `Enter` or `Esc` | — |
 | Preview an option | Move the mouse to the left or right half | `←` / `→` or `A` / `D` | Tap a side |
 | Choose the previewed option | Click | Press the same key again | Tap the same side again |
 | Continue a briefing or a finished flight | Click | `Space` or `Enter` | Tap |
 | Restart on the results screen | — | `R` | — |
-| Quit | Close the window | `Esc` | — |
+| Quit | Close the window | `Esc` (on any screen except the guide) | — |
 
 ## 4. How a mission works
+
+New to the game? On the title screen, **HOW IT WORKS** opens a one-page guide
+to the trade-off at the heart of every mission: cost, mass and schedule.
 
 Each card shows two options. Each option has a good **and** a bad side, and the
 numbers on the card tell you how it changes your budget, mass, power, schedule
