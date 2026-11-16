@@ -36,7 +36,7 @@ animation, so the spacecraft becomes lighter as the mission progresses.
 ## Run locally
 
 ```bash
-python -m pip install pygame
+python -m pip install -r requirements.txt
 python for_astronaut.py
 ```
 
@@ -45,6 +45,28 @@ start. Use the mouse or arrow keys to preview and select choices. The
 astronaut sprites react to mission decisions, risks, flight stages and results.
 Press `Space` to continue through briefings and completed flight animations,
 `R` to restart on the results screen, and `Esc` to quit.
+
+## Project structure
+
+```text
+for_astronaut.py         Desktop edition (entry point)
+assets/images/           Artwork (astronaut, menus, mission modes, difficulty, scenery)
+assets/audio/            Sound effects and theme music
+for_astronaut_mobile/    Landscape mobile edition and Android packaging
+tests/                   Headless automated tests
+docs/                    Architecture, assets, development guide and AI usage
+```
+
+## Tests
+
+```bash
+python -m unittest discover -s tests -v
+```
+
+## Documentation
+
+See [`docs/`](docs/README.md), including the record of how AI was and was not
+used in this project: [`docs/ai_usage.md`](docs/ai_usage.md).
 
 ## NASA references
 

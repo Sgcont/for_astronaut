@@ -1,0 +1,20 @@
+# Python bytecode and caches
+__pycache__/
+*.py[cod]
+
+# Virtual environments
+.venv/
+venv/
+
+# Build output (PyInstaller, Buildozer, pygbag)
+build/
+dist/
+*.spec.bak
+for_astronaut_mobile/bin/
+for_astronaut_mobile/.buildozer/
+
+# Editors and OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
