@@ -1097,21 +1097,40 @@ def menu_play_rect():
     return pygame.Rect(round(452 / 1299 * W), round(318 / 770 * H),
                        round(423 / 1299 * W), round(108 / 770 * H))
 
+def menu_how_rect():
+    return pygame.Rect(round(452 / 1299 * W), round(446 / 770 * H),
+                       round(423 / 1299 * W), round(108 / 770 * H))
+
+
+
 
 def draw_title(t):
     screen.fill((0, 0, 0))
     menu = pygame.transform.smoothscale(A['menu'], (W, H))
     screen.blit(menu, (0, 0))
+    mpos = pygame.mouse.get_pos()
+
     play = menu_play_rect()
-    if play.collidepoint(pygame.mouse.get_pos()):
+    if play.collidepoint(mpos):
         overlay = pygame.Surface(play.size, pygame.SRCALPHA)
         overlay.fill((255, 255, 255, 28))
         screen.blit(overlay, play.topleft)
         pygame.draw.rect(screen, C_WARN, play, 3)
+
+    how = menu_how_rect()
+    btn_img = A['how_btn_pressed'] if how.collidepoint(mpos) else A['how_btn']
+    screen.blit(pygame.transform.smoothscale(btn_img, how.size), how.topleft)
+
     draw_astronaut(screen, (W - 142, H - 148, 112, 112), 'waving')
     if int(t * 2) % 2 == 0:
         text(screen, 'Click PLAY or press SPACE to start', F['b'], C_WARN, W // 2, H - 42, align='center')
 
+def draw_how(t):
+    screen.fill((12, 14, 42))
+    page = pygame.transform.smoothscale(A['how_page'], (W, H))
+    screen.blit(page, (0, 0))
+    if int(t * 2) % 2 == 0:
+        text(screen, 'Click anywhere or press SPACE to return', F['b'], C_WARN, W // 2, H - 28, align='center')
 
 def draw_banner(t):
     screen.fill(C_BG)
@@ -1331,6 +1350,10 @@ def init():
              n=pygame.font.SysFont(FONT_UI, 15), s=pygame.font.SysFont(FONT_UI, 13), m=pygame.font.SysFont(FONT_MONO, 14))
     asset_dir = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
     A['menu'] = pygame.image.load(os.path.join(asset_dir, 'menu-completo.png')).convert_alpha()
+    A['how_page'] = pygame.image.load(os.path.join(asset_dir, 'menu_modos', 'pag1-howitworks.png')).convert_alpha()
+    A['how_btn'] = pygame.image.load(os.path.join(asset_dir, 'menu_modos', 'botao-howitworks.png')).convert_alpha()
+    A['how_btn_pressed'] = pygame.image.load(os.path.join(asset_dir, 'menu_modos', 'apertado-howitworks.png')).convert_alpha()
+
     for emotion, filename in ASSET_FILES.items():
         A[emotion] = pygame.image.load(os.path.join(asset_dir, filename)).convert_alpha()
     pygame.mixer.init()
@@ -1367,7 +1390,8 @@ def init():
 def update(dt, events):
     """Advance the game. Returns False when the player quits."""
     sc = G['scene']
-    G['toast'] = (G['toast'][0], G['toast'][1], max(0.0, G['toast'][2] - dt))
+    t_msg, t_col, t_rem = G['toast']
+    G['toast'] = (t_msg, t_col, max(0.0, t_rem - dt))
     if G['fly']:
         G['fly']['t'] += dt
         if G['fly']['t'] >= 0.25:
@@ -1376,13 +1400,24 @@ def update(dt, events):
     if sc == 'flight':
         update_flight(dt)
     for e in events:
+        if e.type == pygame.KEYDOWN and e.key == pygame.K_ESCAPE and sc == 'how':
+            play_snd('click')
+            G['scene'] = 'title'
+            continue
         if e.type == pygame.QUIT or (e.type == pygame.KEYDOWN and e.key == pygame.K_ESCAPE):
             return False
         go = e.type == pygame.KEYDOWN and e.key in (pygame.K_SPACE, pygame.K_RETURN)
-        if sc == 'title' and (go or (e.type == pygame.MOUSEBUTTONDOWN and menu_play_rect().collidepoint(e.pos))):
+        if sc == 'title':
+            if go or (e.type == pygame.MOUSEBUTTONDOWN and menu_play_rect().collidepoint(e.pos)):
+                play_snd('click')
+                new_game()
+                advance()
+            elif e.type == pygame.MOUSEBUTTONDOWN and menu_how_rect().collidepoint(e.pos):
+                play_snd('click')
+                G['scene'] = 'how'
+        elif sc == 'how' and (go or e.type == pygame.MOUSEBUTTONDOWN):
             play_snd('click')
-            new_game()
-            advance()
+            G['scene'] = 'title'
         elif sc == 'banner' and (go or e.type == pygame.MOUSEBUTTONDOWN):
             play_snd('click')
             advance()
@@ -1395,12 +1430,14 @@ def update(dt, events):
             advance()
         elif sc == 'card' and not G['fly']:
             if e.type == pygame.MOUSEMOTION:
-                new_lean = -1 if e.pos[0] < W // 2 - 60 else 1 if e.pos[0] > W // 2 + 60 else 0
+                mx, _ = e.pos
+                new_lean = -1 if mx < W // 2 - 60 else 1 if mx > W // 2 + 60 else 0
                 if new_lean != 0 and new_lean != G['lean']:
                     play_snd('card')
                 G['lean'] = new_lean
             elif e.type == pygame.MOUSEBUTTONDOWN and e.button == 1:
-                side = -1 if e.pos[0] < W // 2 else 1
+                mx, _ = e.pos
+                side = -1 if mx < W // 2 else 1
                 G['lean'] = side
                 play_snd('click')
                 choose(side)
@@ -1408,15 +1445,17 @@ def update(dt, events):
                 side = -1 if e.key in (pygame.K_LEFT, pygame.K_a) else 1
                 if G['lean'] == side:
                     play_snd('click')
-                    choose(side)       # second press confirms
+                    choose(side)
                 else:
                     play_snd('card')
-                    G['lean'] = side   # first press previews
+                    G['lean'] = side
     return True
 
 
+
 def draw(t):
-    {'title': draw_title, 'banner': draw_banner, 'card': draw_card_scene, 'flight': draw_flight, 'end': draw_end}[G['scene']](t)
+    {'title': draw_title, 'how': draw_how, 'banner': draw_banner, 'card': draw_card_scene, 'flight': draw_flight, 'end': draw_end}[G['scene']](t)
+    pygame.display.flip()
 
 
 def main():
