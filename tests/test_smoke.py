@@ -91,6 +91,15 @@ class SmokeTest(unittest.TestCase):
             game.draw(0.0)
             self.assertTrue(game.update(0.016, [back]), 'Esc on the guide must not quit')
             self.assertEqual(game.G['scene'], 'title')
+        # The guide page ends with the AI watermark required by Space Apps; the
+        # blinking hint must never cover it (bottom 30 px identical, hint on or off).
+        game.G['scene'] = 'how'
+        band = lambda: pygame.image.tobytes(game.screen.subsurface((0, game.H - 30, game.W, 30)), 'RGB')
+        game.draw(0.0)
+        hint_on = band()
+        game.draw(0.6)
+        self.assertEqual(hint_on, band(), 'the hint covers the AI watermark')
+        game.G['scene'] = 'title'
         self.assertFalse(game.update(0.016, [key(pygame.K_ESCAPE)]), 'Esc on the title quits')
         game.G['scene'] = 'title'
         game.update(0.016, [click(play.center)])

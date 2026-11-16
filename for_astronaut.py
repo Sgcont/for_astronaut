@@ -1130,7 +1130,7 @@ def draw_how(t):
     page = pygame.transform.smoothscale(A['how_page'], (W, H))
     screen.blit(page, (0, 0))
     if int(t * 2) % 2 == 0:
-        text(screen, 'Click anywhere or press SPACE to return', F['b'], C_WARN, W // 2, H - 28, align='center')
+        text(screen, 'Click anywhere or press SPACE to return', F['b'], C_WARN, W // 2, H - 58, align='center')
 
 def draw_banner(t):
     screen.fill(C_BG)
