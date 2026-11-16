@@ -58,6 +58,9 @@ What the AI did:
 - Wrote the documentation in `docs/`.
 - Merged the latest `main` into the branch and moved the three new
   "how it works" images to the new layout (files unchanged).
+- Renamed the "how it works" buttons uploaded to `assets/images/how_it_works/`
+  to `button.png` and `button_pressed.png` and removed the identical copies
+  from `mission_modes/` (files unchanged; no code uses them yet).
 
 What the AI did **not** do:
 

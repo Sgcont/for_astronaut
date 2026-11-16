@@ -11,7 +11,7 @@ for_astronaut/
 │   │   ├── astronaut/          # Pixel-art astronaut, one file per emotion
 │   │   ├── menus/              # Title screen artwork
 │   │   ├── mission_modes/      # "Choose your mission" menu pieces
-│   │   ├── how_it_works/       # "How it works" pages
+│   │   ├── how_it_works/       # "How it works" button and pages
 │   │   ├── difficulty/         # Difficulty menu pieces
 │   │   ├── scenery/            # Earth, Moon and rocket backgrounds
 │   │   └── player_count/       # Reserved for a future player-count menu
