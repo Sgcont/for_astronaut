@@ -72,6 +72,32 @@ How the result was checked: 15 seeded games per edition were played headless
 before and after the change. Every rendered frame and every loaded image and
 sound was byte-identical, and the real entry points ran normally.
 
+### 2026-11-15 — User manual, PDF and LaTeX (Claude Code)
+
+**Requested by:** Ronivaldo Andrade. **Branch:** `docs/manual-pdf`.
+
+What the AI did:
+
+- Wrote the user manual `docs/manual.md` from the game's README and code
+  (controls, phases and the scoring weights in `compute_results`).
+- Generated `docs/manual.pdf` from `manual.md` with a Markdown-to-PDF script.
+  The script is **not** part of this repository.
+- Created the LaTeX version `docs/manual.tex`, with the same content.
+- Laid out both versions in the game's own visual identity (navy, violet and
+  yellow from the game art, pixel stars, Irene's pixel-art astronaut on the
+  cover). NASA logos and insignia are **not** used, as required by the rules.
+- Marked all three as AI-assisted: a note at the end of the manual and the PDF
+  metadata (subject and keywords).
+
+What the AI did **not** do:
+
+- It did not change the game, its rules or its texts; the manual only describes
+  them.
+
+How the result was checked: the PDF (5 pages) and the LaTeX build (3 pages,
+`latexmk` without errors or warnings) were rendered and reviewed; links in the
+documentation resolve; the automated tests still pass.
+
 ## Template for new entries
 
 ```markdown
