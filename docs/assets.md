@@ -59,15 +59,17 @@ is not used yet was delivered for menus planned for later versions.
 ## Authorship and licences
 
 Space Apps requires every third-party resource (code, image, audio, text) to be
-listed, even free ones. Fill this table as the team confirms each item.
+listed, even free ones. The full credits, with links, are in
+[CREDITS.md](../CREDITS.md).
 
 | Asset group | Author / source | Licence | Confirmed |
 |---|---|---|---|
-| Astronaut pixel art (`astronaut/`) | | | |
-| Menus, mission modes, difficulty, scenery | | | |
-| "How it works" page (`how_it_works/page_1.png`) | Layout generated with AI (Claude) from original designs by Irene (notice on the image) | | |
-| Sound effects (`audio/*.wav`, `rocket.ogg`) | | | |
-| Theme music (`theme.ogg`) | | | |
+| Astronaut pixel art, menus, mission modes, difficulty, scenery | Irene Mothio | | Pending |
+| "How it works" page (`how_it_works/page_1.png`) | Layout generated with AI (Claude) from original designs by Irene (notice on the image) | | Pending |
+| `theme.ogg` | Yoiyami (OpenGameArt) | CC0 1.0 | Yes |
+| `card.wav`, `click.wav`, `rocket.ogg` | el_boss, SignatureSoundsOrg, derplayer (Freesound) | CC0 1.0 | Yes |
+| `compatible.wav` | grunz (Freesound) | CC BY 3.0, credit required | Yes |
+| `failure.wav`, `alarm.wav` | FunWithSound, newlocknew (Freesound) | CC BY 4.0, credit required | Yes |
 
 ## Adding a new asset
 
@@ -77,4 +79,6 @@ listed, even free ones. Fill this table as the team confirms each item.
    `for_astronaut_mobile/assets/`.
 3. Load it with `os.path.join(asset_dir, 'assets', ...)` as described in
    [architecture.md](architecture.md).
-4. Add a row to this file and run the tests.
+4. Add a row to this file and, for third-party files, to `CREDITS.md`
+   (author, link, licence). Prefer CC0 or CC BY; CC BY requires the credit.
+5. Run the tests.
